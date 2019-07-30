@@ -1,3 +1,6 @@
+//! # encodingbufreader
+//!
+//! `encodingbufreader` is a BufReader with encoding.
 use encoding::{DecoderTrap, EncodingRef};
 use std::io::{self, BufRead, BufReader, Result};
 
@@ -29,6 +32,7 @@ impl<R: io::Read> Iterator for Lines<R> {
         }
     }
 }
+/// Modificate std::io::BufReader
 pub struct BufReaderEncoding<R> {
     encoder: EncodingRef,
     inner: BufReader<R>,
@@ -115,6 +119,44 @@ impl<R: io::Read> BufReaderEncoding<R> {
     pub fn lines(self) -> Lines<R> {
         Lines { buf: self }
     }
+    /// Read all bytes until a newline (the 0xA byte) is reached, and append
+    /// them to the provided buffer.
+    ///
+    /// This function will read bytes from the underlying stream until the
+    /// newline delimiter (the 0xA byte) or EOF is found. Once found, all bytes
+    /// up to, and including, the delimiter (if found) will be appended to
+    /// `buf`.
+    ///
+    /// If successful, this function will return the total number of bytes read.
+    ///
+    /// If this function returns `Ok(0)`, the stream has reached EOF.
+    ///
+    /// # Errors
+    ///
+    /// This function has the same error semantics as [`std::io::Read::read_until`] and will
+    /// also return an error if the read bytes are not valid encoding. If an I/O
+    /// error is encountered then `buf` may contain some bytes already read in
+    /// the event that all data read so far was valid encoding.
+    ///
+    ///
+    /// # Examples
+    ///
+    ///
+    /// ```
+    /// use encodingbufreader::{BufReaderEncoding};
+    /// use encoding::all::GB18030;
+    /// let bytes: &[u8] = &[
+    ///             213, 226, 202, 199, 210, 187, 184, 246, 215, 214, 183, 251, 180, 174, 10, 189, 171,
+    ///             187, 225, 177, 187, 182, 193, 200, 161,
+    ///         ];
+    /// let mut bufreader = BufReaderEncoding::new(bytes, GB18030);
+    /// let mut buf = String::new();
+    /// let num_bytes = bufreader
+    ///     .read_line(&mut buf)
+    ///     .expect("reading from bytes won't fail");
+    /// assert_eq!(num_bytes, 15);
+    /// assert_eq!(buf, "这是一个字符串\n");
+    /// ```
     pub fn read_line(&mut self, buf: &mut String) -> Result<usize> {
         self.append_to_string(buf)
     }
@@ -167,5 +209,19 @@ mod tests {
         );
         assert_eq!(lines_iter.next(), Some(String::from("将会被读取")));
         assert_eq!(lines_iter.next(), None);
+    }
+    #[test]
+    fn test_decode_readline() {
+        let bytes: &[u8] = &[
+            213, 226, 202, 199, 210, 187, 184, 246, 215, 214, 183, 251, 180, 174, 10, 189, 171,
+            187, 225, 177, 187, 182, 193, 200, 161,
+        ];
+        let mut reader = BufReaderEncoding::new(bytes, GB18030);
+        let mut buf = String::new();
+        let num_bytes = reader
+            .read_line(&mut buf)
+            .expect("reading from bytes won't fail");
+        assert_eq!(num_bytes, 15);
+        assert_eq!(buf, "这是一个字符串\n");
     }
 }

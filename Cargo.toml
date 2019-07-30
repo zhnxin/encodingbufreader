@@ -5,5 +5,9 @@ name = "encodingbufreader"
 version = "0.1.0"
 license = "MIT"
 description = "A BuferReader with encoding."
+homepage = "https://github.com/zhnxin/encodingbufreader"
+repository="https://github.com/zhnxin/encodingbufreader"
+keywords = ["encoding", "unicode", "charset","bufread"]
+readme = "README.md"
 [dependencies]
 encoding = "0.2.33"
