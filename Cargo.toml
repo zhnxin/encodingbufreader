@@ -2,7 +2,7 @@
 authors = ["zhengxin <zhngxin@aliyun.com>"]
 edition = "2018"
 name = "encodingbufreader"
-version = "0.1.0"
+version = "0.1.1"
 license = "MIT"
 description = "A BuferReader with encoding."
 homepage = "https://github.com/zhnxin/encodingbufreader"
