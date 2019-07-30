@@ -3,5 +3,7 @@ authors = ["zhengxin <zhngxin@aliyun.com>"]
 edition = "2018"
 name = "encodingbufreader"
 version = "0.1.0"
+license = "MIT"
+description = "A BuferReader with encoding."
 [dependencies]
-encoding = "*"
+encoding = "0.2.33"
